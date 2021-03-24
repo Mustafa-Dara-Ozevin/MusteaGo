@@ -1,3 +1,3 @@
-module github.com/Mustafa-Dara-Ozevin/Go_Chess_Engine.git
+module github.com/Mustafa-Dara-Ozevin/MusteaGo.git
 
 go 1.16
