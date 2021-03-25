@@ -5,10 +5,17 @@ import "math/rand"
 const Name string = "Mustea 1.0"
 const BoardSqrNum = 120
 const MaxGameMoves = 2048
+const MFlagEP = 0x40000
+const MFlagPS = 0x80000
+const MFlagCa = 0x1000000
+const MFlagCap = 0x7c000
+const MFlagProm = 0xf00000
 const StartingFen string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 var Sq120ToSq64 [BoardSqrNum]int
 var Sq64ToSq120 [64]int
+var FileBrd [BoardSqrNum]int
+var RankBrd [BoardSqrNum]int
 
 var SetMask [64]uint64
 var ClearMask [64]uint64
@@ -146,6 +153,11 @@ type undo struct {
 	PosKey     uint64
 }
 
+type Move struct {
+	move  int
+	score int
+}
+
 //Util Funcs
 
 func Fr2Sq(f, r int) int {
@@ -171,4 +183,45 @@ func SetBit(bb *uint64, sq int) {
 }
 func Rand64() uint64 {
 	return uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
+}
+func IsBq(sq int) bool {
+	return PieceBishopQueen[sq]
+}
+func IsRq(sq int) bool {
+	return PieceRookQueen[sq]
+}
+func IsKn(sq int) bool {
+	return PieceKnight[sq]
+}
+func IsKi(sq int) bool {
+	return PieceKing[sq]
+}
+
+func FromSq(move int) int {
+	return move & 0x7f
+}
+func ToSq(move int) int {
+	return (move >> 7) & 0x7f
+}
+
+func Captured(move int) int {
+	return (move >> 14) & 0xf
+}
+func Promoted(move int) int {
+	return (move >> 20) & 0xf
+}
+func IsEnPas(move int) bool {
+	return (move & MFlagEP) != 0
+}
+func IsPaSt(move int) bool {
+	return (move & MFlagPS) != 0
+}
+func IsCa(move int) bool {
+	return (move & MFlagCa) != 0
+}
+func IsCp(move int) bool {
+	return (move & MFlagCap) != 0
+}
+func IsPr(move int) bool {
+	return (move & MFlagProm) != 0
 }

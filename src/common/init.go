@@ -23,6 +23,22 @@ func initBitmasks() {
 	}
 }
 
+func initFilesRanksBrd() {
+	for index := 0; index < BoardSqrNum; index++ {
+		FileBrd[index] = OffBoard
+		RankBrd[index] = OffBoard
+	}
+
+	for rank := Rank1; rank <= Rank8; rank++ {
+		for file := FileA; file <= FileH; file++ {
+			sq := Fr2Sq(file, rank)
+			FileBrd[sq] = file
+			RankBrd[sq] = rank
+		}
+	}
+
+}
+
 func initSq120To64() {
 
 	for index := 0; index < BoardSqrNum; index++ {
@@ -47,4 +63,5 @@ func AllInit() {
 	initSq120To64()
 	initBitmasks()
 	initHashKeys()
+	initFilesRanksBrd()
 }

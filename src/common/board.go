@@ -24,10 +24,11 @@ type Board struct {
 
 	PosKey uint64
 
-	PceNum [13]int
-	BigPce [3]int
-	MajPce [3]int
-	MinPce [3]int
+	PceNum   [13]int
+	BigPce   [2]int
+	MajPce   [2]int
+	MinPce   [2]int
+	Material [2]int
 
 	History [MaxGameMoves]undo
 
@@ -129,6 +130,48 @@ func (b *Board) ParseFen(fen string) {
 	}
 
 	b.GeneratePosKey()
+	b.UpdateListMaterial()
+}
+
+func (b *Board) UpdateListMaterial() {
+
+	for index := 0; index < BoardSqrNum; index++ {
+		sq := index
+		piece := b.Pieces[index]
+		if piece != OffBoard && piece != Empty {
+			colour := PieceCol[piece]
+
+			if PieceBig[piece] {
+				b.BigPce[colour]++
+			}
+			if PieceMin[piece] {
+				b.MinPce[colour]++
+			}
+			if PieceMaj[piece] {
+				b.MajPce[colour]++
+			}
+
+			b.Material[colour] += PieceVal[piece]
+
+			b.PceList[piece][b.PceNum[piece]] = sq
+			b.PceNum[piece]++
+
+			if piece == WK {
+				b.KingSq[White] = sq
+			}
+			if piece == BK {
+				b.KingSq[Black] = sq
+			}
+
+			if piece == WP {
+				SetBit(&b.Pawns[White], Sq64(sq))
+				SetBit(&b.Pawns[Both], Sq64(sq))
+			} else if piece == BP {
+				SetBit(&b.Pawns[Black], Sq64(sq))
+				SetBit(&b.Pawns[Both], Sq64(sq))
+			}
+		}
+	}
 }
 
 func (b *Board) ResetBoard() {
@@ -139,12 +182,13 @@ func (b *Board) ResetBoard() {
 		b.Pieces[Sq120(idx)] = Empty
 	}
 
-	for idx := 0; idx < 3; idx++ {
+	for idx := 0; idx < 2; idx++ {
 		b.BigPce[idx] = 0
 		b.MajPce[idx] = 0
 		b.MinPce[idx] = 0
 		b.Pawns[idx] = 0
 	}
+	b.Pawns[2] = 0
 	for idx := 0; idx < 13; idx++ {
 		b.PceNum[idx] = 0
 	}
