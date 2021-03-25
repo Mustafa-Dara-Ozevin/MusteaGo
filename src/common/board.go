@@ -110,7 +110,7 @@ func (b *Board) ParseFen(fen string) {
 		b.CastlePerm |= WKCA
 	}
 	if strings.Contains(sCastleRights, "Q") {
-		b.CastlePerm |= WKCA
+		b.CastlePerm |= WQCA
 	}
 	if strings.Contains(sCastleRights, "k") {
 		b.CastlePerm |= BKCA
@@ -122,7 +122,7 @@ func (b *Board) ParseFen(fen string) {
 	if enpas != "-" {
 		var file = int(byte(enpas[0]) - 'a')
 		var rank, _ = strconv.Atoi(string(enpas[1]))
-		b.EnPas = Fr2Sq(file, rank)
+		b.EnPas = Fr2Sq(file, rank) - 10
 	}
 
 	if len(tokens) > 4 {
@@ -186,6 +186,7 @@ func (b *Board) ResetBoard() {
 		b.BigPce[idx] = 0
 		b.MajPce[idx] = 0
 		b.MinPce[idx] = 0
+		b.Material[idx] = 0
 		b.Pawns[idx] = 0
 	}
 	b.Pawns[2] = 0

@@ -7,8 +7,11 @@ import (
 func main() {
 	common.AllInit()
 	var board common.Board
-	a := "r1bq2k1/ppp1n1pp/2nb4/3pp3/8/PP1PPrPP/1BP1NP2/RN1QK2R w KQ - 0 11"
+	a := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 	board.ParseFen(a)
 	board.PrintBoard()
+	var list common.MoveList
+	board.GenerateAllMoves(&list)
+	common.PrintMoveList(&list)
 
 }

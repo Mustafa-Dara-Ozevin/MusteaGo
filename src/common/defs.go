@@ -5,6 +5,7 @@ import "math/rand"
 const Name string = "Mustea 1.0"
 const BoardSqrNum = 120
 const MaxGameMoves = 2048
+const MaxPosMoves = 256
 const MFlagEP = 0x40000
 const MFlagPS = 0x80000
 const MFlagCa = 0x1000000
@@ -156,6 +157,11 @@ type undo struct {
 type Move struct {
 	move  int
 	score int
+}
+
+type MoveList struct {
+	moves [MaxPosMoves]Move
+	count int
 }
 
 //Util Funcs
