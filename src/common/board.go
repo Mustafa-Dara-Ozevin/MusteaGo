@@ -50,11 +50,16 @@ func (b *Board) ParseFen(fen string) {
 		fmt.Println("parse fen failed", fen)
 	}
 
-	var i = 0
+	var rank = Rank8
+	var file = FileA
 	for _, ch := range tokens[0] {
+		if (file+1)%9 == 0 {
+			rank--
+			file = FileA
+		}
 		if unicode.IsDigit(ch) {
 			var n, _ = strconv.Atoi(string(ch))
-			i += n
+			file += n
 		} else if unicode.IsLetter(ch) {
 			switch ch {
 			case 'p':
@@ -82,9 +87,12 @@ func (b *Board) ParseFen(fen string) {
 			case 'Q':
 				piece = WQ
 			}
-			sq120 := Sq120(i)
-			b.Pieces[sq120] = piece
-			i++
+			sq64 := rank*8 + file
+			sq120 := Sq120(sq64)
+			if piece != Empty {
+				b.Pieces[sq120] = piece
+			}
+			file++
 
 		}
 
@@ -158,8 +166,8 @@ func (b *Board) ResetBoard() {
 
 func (b *Board) PrintBoard() {
 	fmt.Printf("\nGame Board:\n\n")
-	for rank := Rank1; rank <= Rank8; rank++ {
-		fmt.Printf("%d  ", 8-rank)
+	for rank := Rank8; rank >= Rank1; rank-- {
+		fmt.Printf("%d  ", rank+1)
 		for file := FileA; file <= FileH; file++ {
 			sq := Fr2Sq(file, rank)
 			piece := b.Pieces[sq]
@@ -172,7 +180,6 @@ func (b *Board) PrintBoard() {
 		fmt.Printf("%3c", FileChar[file])
 	}
 	fmt.Printf("\n")
-
 }
 
 func (b *Board) GeneratePosKey() {
