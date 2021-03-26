@@ -33,6 +33,14 @@ type Board struct {
 	History [MaxGameMoves]undo
 
 	PceList [13][10]int
+
+	PvTable PvTable
+}
+
+func NewBoardFromFEN(fen string) Board {
+	var b Board
+	b.ParseFen(fen)
+	return b
 }
 
 func (b *Board) ParseFen(fen string) {

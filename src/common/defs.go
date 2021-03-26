@@ -1,11 +1,15 @@
 package common
 
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
 
 const Name string = "Mustea 1.0"
 const BoardSqrNum = 120
 const MaxGameMoves = 2048
 const MaxPosMoves = 256
+const NoMove = 0
 const MFlagEP = 0x40000
 const MFlagPS = 0x80000
 const MFlagCa = 0x1000000
@@ -146,6 +150,15 @@ const (
 	BQCA = 8
 )
 
+type PvEntry struct {
+	PosKey uint64
+	Move   int
+}
+type PvTable struct {
+	PosKey     []PvEntry
+	NumEntries int
+}
+
 type undo struct {
 	move       int
 	CastlePerm int
@@ -155,13 +168,24 @@ type undo struct {
 }
 
 type Move struct {
-	move  int
-	score int
+	Move  int
+	Score int
 }
 
 type MoveList struct {
-	moves [MaxPosMoves]Move
-	count int
+	Moves [MaxPosMoves]Move
+	Count int
+}
+
+func (m *MoveList) GetMoves() []int {
+	var moves []int
+	for _, move := range m.Moves {
+		if move.Move == 0 {
+			break
+		}
+		moves = append(moves, move.Move)
+	}
+	return moves
 }
 
 //Util Funcs
@@ -230,4 +254,15 @@ func IsCp(move int) bool {
 }
 func IsPr(move int) bool {
 	return (move & MFlagProm) != 0
+}
+func (b *Board) IsRepetition() bool {
+	for index := b.HisPly - b.FiftyMove; index < (b.HisPly - 1); index++ {
+		if b.PosKey == b.History[index].PosKey {
+			return true
+		}
+	}
+	return false
+}
+func TimeMs() int {
+	return int(time.Now().UnixNano()) / int(time.Millisecond)
 }

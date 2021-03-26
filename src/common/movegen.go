@@ -33,76 +33,76 @@ func isSqOffboard(sq int) bool {
 	return FileBrd[sq] == OffBoard
 }
 
-func (b *Board) AddQuietMove(move int, list *MoveList) {
-	list.moves[list.count].move = move
-	list.moves[list.count].score = 0
-	list.count++
+func (b *Board) addQuietMove(move int, list *MoveList) {
+	list.Moves[list.Count].Move = move
+	list.Moves[list.Count].Score = 0
+	list.Count++
 
 }
-func (b *Board) AddCaptureMove(move int, list *MoveList) {
-	list.moves[list.count].move = move
-	list.moves[list.count].score = 0
-	list.count++
+func (b *Board) addCaptureMove(move int, list *MoveList) {
+	list.Moves[list.Count].Move = move
+	list.Moves[list.Count].Score = 0
+	list.Count++
 
 }
-func (b *Board) AddEnPassantMove(move int, list *MoveList) {
-	list.moves[list.count].move = move
-	list.moves[list.count].score = 0
-	list.count++
+func (b *Board) addEnPassantMove(move int, list *MoveList) {
+	list.Moves[list.Count].Move = move
+	list.Moves[list.Count].Score = 0
+	list.Count++
 
 }
 
-func (b *Board) AddWhitePawnCapMove(from, to, cap int, list *MoveList) {
+func (b *Board) addWhitePawnCapMove(from, to, cap int, list *MoveList) {
 
 	if RankBrd[from] == Rank7 {
-		b.AddQuietMove(MOVE(from, to, cap, WQ, 0), list)
-		b.AddQuietMove(MOVE(from, to, cap, WR, 0), list)
-		b.AddQuietMove(MOVE(from, to, cap, WB, 0), list)
-		b.AddQuietMove(MOVE(from, to, cap, WN, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, WQ, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, WR, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, WB, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, WN, 0), list)
 	} else {
-		b.AddQuietMove(MOVE(from, to, cap, Empty, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, Empty, 0), list)
 	}
 }
 
-func (b *Board) AddWhitePawnMove(from, to int, list *MoveList) {
+func (b *Board) addWhitePawnMove(from, to int, list *MoveList) {
 
 	if RankBrd[from] == Rank7 {
-		b.AddQuietMove(MOVE(from, to, Empty, WQ, 0), list)
-		b.AddQuietMove(MOVE(from, to, Empty, WR, 0), list)
-		b.AddQuietMove(MOVE(from, to, Empty, WB, 0), list)
-		b.AddQuietMove(MOVE(from, to, Empty, WN, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, WQ, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, WR, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, WB, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, WN, 0), list)
 	} else {
-		b.AddQuietMove(MOVE(from, to, Empty, Empty, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, Empty, 0), list)
 	}
 }
 
-func (b *Board) AddBlackPawnCapMove(from, to, cap int, list *MoveList) {
+func (b *Board) addBlackPawnCapMove(from, to, cap int, list *MoveList) {
 
 	if RankBrd[from] == Rank2 {
-		b.AddQuietMove(MOVE(from, to, cap, BQ, 0), list)
-		b.AddQuietMove(MOVE(from, to, cap, BR, 0), list)
-		b.AddQuietMove(MOVE(from, to, cap, BB, 0), list)
-		b.AddQuietMove(MOVE(from, to, cap, BN, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, BQ, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, BR, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, BB, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, BN, 0), list)
 	} else {
-		b.AddQuietMove(MOVE(from, to, cap, Empty, 0), list)
+		b.addQuietMove(MOVE(from, to, cap, Empty, 0), list)
 	}
 }
 
-func (b *Board) AddBlackPawnMove(from, to int, list *MoveList) {
+func (b *Board) addBlackPawnMove(from, to int, list *MoveList) {
 
 	if RankBrd[from] == Rank2 {
-		b.AddQuietMove(MOVE(from, to, Empty, BQ, 0), list)
-		b.AddQuietMove(MOVE(from, to, Empty, BR, 0), list)
-		b.AddQuietMove(MOVE(from, to, Empty, BB, 0), list)
-		b.AddQuietMove(MOVE(from, to, Empty, BN, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, BQ, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, BR, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, BB, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, BN, 0), list)
 	} else {
-		b.AddQuietMove(MOVE(from, to, Empty, Empty, 0), list)
+		b.addQuietMove(MOVE(from, to, Empty, Empty, 0), list)
 	}
 }
 
 func (b *Board) GenerateAllMoves(list *MoveList) {
 
-	list.count = 0
+	list.Count = 0
 
 	side := b.Side
 
@@ -112,39 +112,39 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 			sq := b.PceList[WP][pceNum]
 
 			if b.Pieces[sq+10] == Empty {
-				b.AddWhitePawnMove(sq, sq+10, list)
+				b.addWhitePawnMove(sq, sq+10, list)
 				if RankBrd[sq] == Rank2 && b.Pieces[sq+20] == Empty {
-					b.AddQuietMove(MOVE(sq, (sq+20), Empty, Empty, MFlagPS), list)
+					b.addQuietMove(MOVE(sq, (sq+20), Empty, Empty, MFlagPS), list)
 				}
 			}
 
 			if !isSqOffboard(sq+9) && PieceCol[b.Pieces[sq+9]] == Black {
-				b.AddWhitePawnCapMove(sq, sq+9, b.Pieces[sq+9], list)
+				b.addWhitePawnCapMove(sq, sq+9, b.Pieces[sq+9], list)
 			}
 			if !isSqOffboard(sq+11) && PieceCol[b.Pieces[sq+11]] == Black {
-				b.AddWhitePawnCapMove(sq, sq+11, b.Pieces[sq+11], list)
+				b.addWhitePawnCapMove(sq, sq+11, b.Pieces[sq+11], list)
 			}
 
 			if b.EnPas != NoSq {
 				if sq+9 == b.EnPas {
-					b.AddEnPassantMove(MOVE(sq, sq+9, Empty, Empty, MFlagEP), list)
+					b.addEnPassantMove(MOVE(sq, sq+9, Empty, Empty, MFlagEP), list)
 				}
 				if sq+11 == b.EnPas {
-					b.AddEnPassantMove(MOVE(sq, sq+11, Empty, Empty, MFlagEP), list)
+					b.addEnPassantMove(MOVE(sq, sq+11, Empty, Empty, MFlagEP), list)
 				}
 			}
 		}
 		if b.CastlePerm&WKCA != 0 {
 			if b.Pieces[F1] == Empty && b.Pieces[G1] == Empty {
 				if !b.IsAttacked(E1, Black) && !b.IsAttacked(G1, Black) {
-					b.AddQuietMove(MOVE(E1, G1, Empty, Empty, MFlagCa), list)
+					b.addQuietMove(MOVE(E1, G1, Empty, Empty, MFlagCa), list)
 				}
 			}
 		}
 		if b.CastlePerm&WQCA != 0 {
 			if b.Pieces[B1] == Empty && b.Pieces[D1] == Empty && b.Pieces[C1] == Empty {
 				if !b.IsAttacked(E1, Black) && !b.IsAttacked(D1, Black) && !b.IsAttacked(C1, Black) {
-					b.AddQuietMove(MOVE(E1, C1, Empty, Empty, MFlagCa), list)
+					b.addQuietMove(MOVE(E1, C1, Empty, Empty, MFlagCa), list)
 
 				}
 			}
@@ -155,32 +155,32 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 			sq := b.PceList[BP][pceNum]
 
 			if b.Pieces[sq-10] == Empty {
-				b.AddBlackPawnMove(sq, sq-10, list)
+				b.addBlackPawnMove(sq, sq-10, list)
 				if RankBrd[sq] == Rank7 && b.Pieces[sq-20] == Empty {
-					b.AddQuietMove(MOVE(sq, (sq-20), Empty, Empty, MFlagPS), list)
+					b.addQuietMove(MOVE(sq, (sq-20), Empty, Empty, MFlagPS), list)
 				}
 			}
 
-			if !isSqOffboard(sq-9) && PieceCol[b.Pieces[sq-9]] == Black {
-				b.AddBlackPawnCapMove(sq, sq-9, b.Pieces[sq-9], list)
+			if !isSqOffboard(sq-9) && PieceCol[b.Pieces[sq-9]] == White {
+				b.addBlackPawnCapMove(sq, sq-9, b.Pieces[sq-9], list)
 			}
-			if !isSqOffboard(sq-11) && PieceCol[b.Pieces[sq-11]] == Black {
-				b.AddBlackPawnCapMove(sq, sq-11, b.Pieces[sq-11], list)
+			if !isSqOffboard(sq-11) && PieceCol[b.Pieces[sq-11]] == White {
+				b.addBlackPawnCapMove(sq, sq-11, b.Pieces[sq-11], list)
 			}
 
 			if b.EnPas != NoSq {
 				if sq-9 == b.EnPas {
-					b.AddEnPassantMove(MOVE(sq, sq-9, Empty, Empty, MFlagEP), list)
+					b.addEnPassantMove(MOVE(sq, sq-9, Empty, Empty, MFlagEP), list)
 				}
 				if sq-11 == b.EnPas {
-					b.AddEnPassantMove(MOVE(sq, sq-11, Empty, Empty, MFlagEP), list)
+					b.addEnPassantMove(MOVE(sq, sq-11, Empty, Empty, MFlagEP), list)
 				}
 			}
 		}
 		if b.CastlePerm&BKCA != 0 {
 			if b.Pieces[F8] == Empty && b.Pieces[G8] == Empty {
 				if !b.IsAttacked(E8, White) && !b.IsAttacked(G8, White) {
-					b.AddQuietMove(MOVE(E8, G8, Empty, Empty, MFlagCa), list)
+					b.addQuietMove(MOVE(E8, G8, Empty, Empty, MFlagCa), list)
 
 				}
 			}
@@ -188,7 +188,7 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 		if b.CastlePerm&BQCA != 0 {
 			if b.Pieces[B8] == Empty && b.Pieces[D8] == Empty && b.Pieces[C8] == Empty {
 				if !b.IsAttacked(E8, White) && !b.IsAttacked(D8, White) && !b.IsAttacked(C8, White) {
-					b.AddQuietMove(MOVE(E8, C8, Empty, Empty, MFlagCa), list)
+					b.addQuietMove(MOVE(E8, C8, Empty, Empty, MFlagCa), list)
 
 				}
 			}
@@ -210,11 +210,11 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 
 					if b.Pieces[t_sq] != Empty {
 						if PieceCol[b.Pieces[t_sq]] == side^1 {
-							b.AddCaptureMove(MOVE(sq, t_sq, b.Pieces[t_sq], Empty, 0), list)
+							b.addCaptureMove(MOVE(sq, t_sq, b.Pieces[t_sq], Empty, 0), list)
 						}
 						break
 					}
-					b.AddQuietMove(MOVE(sq, t_sq, Empty, Empty, 0), list)
+					b.addQuietMove(MOVE(sq, t_sq, Empty, Empty, 0), list)
 					t_sq += dir
 				}
 			}
@@ -239,11 +239,11 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 				}
 				if b.Pieces[t_sq] != Empty {
 					if PieceCol[b.Pieces[t_sq]] == side^1 {
-						b.AddCaptureMove(MOVE(sq, t_sq, b.Pieces[t_sq], Empty, 0), list)
+						b.addCaptureMove(MOVE(sq, t_sq, b.Pieces[t_sq], Empty, 0), list)
 					}
 					continue
 				}
-				b.AddQuietMove(MOVE(sq, t_sq, Empty, Empty, 0), list)
+				b.addQuietMove(MOVE(sq, t_sq, Empty, Empty, 0), list)
 
 			}
 		}

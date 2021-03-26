@@ -11,6 +11,37 @@ func PrSq(sq int) string {
 
 }
 
+func (b *Board) ParseMove(fen string) int {
+	from := Fr2Sq(int(byte(fen[0])-'a'), int(byte(fen[1])-'1'))
+	to := Fr2Sq(int(byte(fen[2])-'a'), int(byte(fen[3])-'1'))
+
+	var list MoveList
+	b.GenerateAllMoves(&list)
+	PromPce := Empty
+
+	for MoveNum := 0; MoveNum < list.Count; MoveNum++ {
+		Move := list.Moves[MoveNum].Move
+		if FromSq(Move) == from && ToSq(Move) == to {
+			PromPce = Promoted(Move)
+			if PromPce != Empty {
+				if IsRq(PromPce) && !IsBq(PromPce) && fen[4] == 'r' {
+					return Move
+				} else if !IsRq(PromPce) && IsBq(PromPce) && fen[4] == 'b' {
+					return Move
+				} else if IsRq(PromPce) && IsBq(PromPce) && fen[4] == 'q' {
+					return Move
+				} else if IsKn(PromPce) && fen[4] == 'n' {
+					return Move
+				}
+				continue
+			}
+			return Move
+		}
+	}
+
+	return NoMove
+}
+
 func PrMove(move int) string {
 
 	var MvStr string
@@ -42,12 +73,12 @@ func PrMove(move int) string {
 func PrintMoveList(list *MoveList) {
 	fmt.Printf("MoveList:\n")
 
-	for index := 0; index < list.count; index++ {
+	for index := 0; index < list.Count; index++ {
 
-		move := list.moves[index].move
-		score := list.moves[index].score
+		move := list.Moves[index].Move
+		score := list.Moves[index].Score
 
 		fmt.Printf("Move:%d > %s (score:%d)\n", index+1, PrMove(move), score)
 	}
-	fmt.Printf("MoveList Total %d Moves:\n\n", list.count)
+	fmt.Printf("MoveList Total %d Moves:\n\n", list.Count)
 }
