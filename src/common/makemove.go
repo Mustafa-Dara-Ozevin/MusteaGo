@@ -29,7 +29,6 @@ func (b *Board) hashEP() {
 }
 
 func (b *Board) clearPiece(sq int) {
-
 	pce := b.Pieces[sq]
 
 	col := PieceCol[pce]
@@ -168,9 +167,8 @@ func (b *Board) MakeMove(move int) bool {
 		b.clearPiece(to)
 		b.FiftyMove = 0
 	}
-
-	b.HisPly++
 	b.Ply++
+	b.HisPly++
 
 	if PiecePawn[b.Pieces[from]] {
 		b.FiftyMove = 0
@@ -189,7 +187,7 @@ func (b *Board) MakeMove(move int) bool {
 	b.movePiece(from, to)
 
 	prPce := Promoted(move)
-	if prPce != Empty {
+	if IsPr(move) && prPce != Empty && !PiecePawn[prPce] {
 		b.clearPiece(to)
 		b.addPiece(to, prPce)
 	}
@@ -211,8 +209,8 @@ func (b *Board) MakeMove(move int) bool {
 }
 
 func (b *Board) TakeMove() {
-	b.HisPly--
 	b.Ply--
+	b.HisPly--
 	move := b.History[b.HisPly].move
 	from := FromSq(move)
 	to := ToSq(move)
@@ -281,7 +279,6 @@ func (b *Board) TakeMove() {
 
 func (b *Board) MakeNullMove() {
 
-	b.Ply++
 	b.History[b.HisPly].PosKey = b.PosKey
 
 	if b.EnPas != NoSq {
@@ -295,6 +292,7 @@ func (b *Board) MakeNullMove() {
 	b.EnPas = NoSq
 
 	b.Side ^= 1
+	b.Ply++
 	b.HisPly++
 	b.hashSide()
 

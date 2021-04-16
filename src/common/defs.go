@@ -2,19 +2,26 @@ package common
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 )
 
-const Name string = "Mustea 1.0"
+var wg sync.WaitGroup
+
+const Name string = "common 1.0"
 const BoardSqrNum = 120
 const MaxGameMoves = 2048
 const MaxPosMoves = 256
+const MaxDepth = 64
 const NoMove = 0
 const MFlagEP = 0x40000
 const MFlagPS = 0x80000
 const MFlagCa = 0x1000000
 const MFlagCap = 0x7c000
 const MFlagProm = 0xf00000
+const PvSize = 0x100000 * 2
+const Infinite = 300000
+const Mate = 290000
 const StartingFen string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 var Sq120ToSq64 [BoardSqrNum]int
@@ -154,8 +161,9 @@ type PvEntry struct {
 	PosKey uint64
 	Move   int
 }
+
 type PvTable struct {
-	PosKey     []PvEntry
+	PTable     [PvSize]PvEntry
 	NumEntries int
 }
 
@@ -165,6 +173,24 @@ type undo struct {
 	EnPas      int
 	FiftyMove  int
 	PosKey     uint64
+}
+
+type SearchInfo struct {
+	StartTime int
+	StopTime  int
+	Depth     int
+	DepthSet  int
+	MovesToGo int
+
+	Nodes int
+
+	Quit     bool
+	Stopped  bool
+	TimeSet  bool
+	Infinite bool
+
+	fh  float64
+	fhf float64
 }
 
 type Move struct {
@@ -177,13 +203,13 @@ type MoveList struct {
 	Count int
 }
 
-func (m *MoveList) GetMoves() []int {
-	var moves []int
+func (m *MoveList) GetMoves() []Move {
+	var moves []Move
 	for _, move := range m.Moves {
 		if move.Move == 0 {
 			break
 		}
-		moves = append(moves, move.Move)
+		moves = append(moves, move)
 	}
 	return moves
 }
@@ -212,7 +238,8 @@ func SetBit(bb *uint64, sq int) {
 	*bb |= SetMask[sq]
 }
 func Rand64() uint64 {
-	return uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
+	rand.NewSource(time.Now().UnixNano())
+	return rand.Uint64()
 }
 func IsBq(sq int) bool {
 	return PieceBishopQueen[sq]
@@ -256,7 +283,7 @@ func IsPr(move int) bool {
 	return (move & MFlagProm) != 0
 }
 func (b *Board) IsRepetition() bool {
-	for index := b.HisPly - b.FiftyMove; index < (b.HisPly - 1); index++ {
+	for index := 0; index < (b.HisPly - 1); index++ {
 		if b.PosKey == b.History[index].PosKey {
 			return true
 		}

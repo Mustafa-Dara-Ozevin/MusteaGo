@@ -35,6 +35,10 @@ type Board struct {
 	PceList [13][10]int
 
 	PvTable PvTable
+	PvArray [MaxDepth]int
+
+	SearchHistory [13][BoardSqrNum]int
+	SearchKillers [2][MaxDepth]int
 }
 
 func NewBoardFromFEN(fen string) Board {
@@ -44,13 +48,7 @@ func NewBoardFromFEN(fen string) Board {
 }
 
 func (b *Board) ParseFen(fen string) {
-	//rank := RANK_8;
-	//file := FILE_A;
 	piece := 0
-	//count := 0;
-	//i := 0;
-	//isq64 := 0;
-	//sq120 := 0;
 
 	b.ResetBoard()
 
@@ -141,6 +139,21 @@ func (b *Board) ParseFen(fen string) {
 	b.UpdateListMaterial()
 }
 
+func (b *Board) MoveExist(move int) bool {
+	var moveList MoveList
+	b.GenerateAllMoves(&moveList)
+	for _, Move := range moveList.Moves {
+		if !b.MakeMove(move) {
+			continue
+		}
+		b.TakeMove()
+		if Move.Move == move {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *Board) UpdateListMaterial() {
 
 	for index := 0; index < BoardSqrNum; index++ {
@@ -214,7 +227,7 @@ func (b *Board) ResetBoard() {
 	b.CastlePerm = 0
 
 	b.PosKey = 0
-
+	b.PvTable.ClearPvTable()
 }
 
 func (b *Board) PrintBoard() {

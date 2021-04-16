@@ -5,7 +5,8 @@ var LoopSlideIndex = [...]int{0, 4}
 
 var LoopNonSlidePc = [...]int{WN, WK, 0, BN, BK, 0}
 var LoopNonSlideIndex = [...]int{0, 3}
-
+var VictimScore = [...]int{0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600}
+var MvvLvaScores [13][13]int
 var PceDir = [13][8]int{
 	{0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0},
@@ -35,19 +36,25 @@ func isSqOffboard(sq int) bool {
 
 func (b *Board) addQuietMove(move int, list *MoveList) {
 	list.Moves[list.Count].Move = move
-	list.Moves[list.Count].Score = 0
+	if b.SearchKillers[0][b.Ply] == move {
+		list.Moves[list.Count].Score = 900000
+	} else if b.SearchKillers[1][b.Ply] == move {
+		list.Moves[list.Count].Score = 800000
+	} else {
+		list.Moves[list.Count].Score = b.SearchHistory[b.Pieces[ToSq(move)]][b.Pieces[FromSq(move)]]
+	}
 	list.Count++
 
 }
 func (b *Board) addCaptureMove(move int, list *MoveList) {
 	list.Moves[list.Count].Move = move
-	list.Moves[list.Count].Score = 0
+	list.Moves[list.Count].Score = MvvLvaScores[b.Pieces[ToSq(move)]][b.Pieces[FromSq(move)]] + 1000000
 	list.Count++
 
 }
 func (b *Board) addEnPassantMove(move int, list *MoveList) {
 	list.Moves[list.Count].Move = move
-	list.Moves[list.Count].Score = 0
+	list.Moves[list.Count].Score = 105 + 1000000
 	list.Count++
 
 }
@@ -136,7 +143,7 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 		}
 		if b.CastlePerm&WKCA != 0 {
 			if b.Pieces[F1] == Empty && b.Pieces[G1] == Empty {
-				if !b.IsAttacked(E1, Black) && !b.IsAttacked(G1, Black) {
+				if !b.IsAttacked(F1, Black) && !b.IsAttacked(G1, Black) && !b.IsAttacked(E1, Black) {
 					b.addQuietMove(MOVE(E1, G1, Empty, Empty, MFlagCa), list)
 				}
 			}
@@ -179,7 +186,7 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 		}
 		if b.CastlePerm&BKCA != 0 {
 			if b.Pieces[F8] == Empty && b.Pieces[G8] == Empty {
-				if !b.IsAttacked(E8, White) && !b.IsAttacked(G8, White) {
+				if !b.IsAttacked(F8, White) && !b.IsAttacked(G8, White) && !b.IsAttacked(E8, White) {
 					b.addQuietMove(MOVE(E8, G8, Empty, Empty, MFlagCa), list)
 
 				}
@@ -244,6 +251,111 @@ func (b *Board) GenerateAllMoves(list *MoveList) {
 					continue
 				}
 				b.addQuietMove(MOVE(sq, t_sq, Empty, Empty, 0), list)
+
+			}
+		}
+		pce = LoopNonSlidePc[pceIndex]
+		pceIndex++
+	}
+
+}
+
+func (b *Board) GenerateAllCaps(list *MoveList) {
+
+	list.Count = 0
+
+	side := b.Side
+
+	if side == White {
+
+		for pceNum := 0; pceNum < b.PceNum[WP]; pceNum++ {
+			sq := b.PceList[WP][pceNum]
+
+			if !isSqOffboard(sq+9) && PieceCol[b.Pieces[sq+9]] == Black {
+				b.addWhitePawnCapMove(sq, sq+9, b.Pieces[sq+9], list)
+			}
+			if !isSqOffboard(sq+11) && PieceCol[b.Pieces[sq+11]] == Black {
+				b.addWhitePawnCapMove(sq, sq+11, b.Pieces[sq+11], list)
+			}
+
+			if b.EnPas != NoSq {
+				if sq+9 == b.EnPas {
+					b.addEnPassantMove(MOVE(sq, sq+9, Empty, Empty, MFlagEP), list)
+				}
+				if sq+11 == b.EnPas {
+					b.addEnPassantMove(MOVE(sq, sq+11, Empty, Empty, MFlagEP), list)
+				}
+			}
+		}
+	} else {
+		for pceNum := 0; pceNum < b.PceNum[BP]; pceNum++ {
+			sq := b.PceList[BP][pceNum]
+
+			if !isSqOffboard(sq-9) && PieceCol[b.Pieces[sq-9]] == White {
+				b.addBlackPawnCapMove(sq, sq-9, b.Pieces[sq-9], list)
+			}
+			if !isSqOffboard(sq-11) && PieceCol[b.Pieces[sq-11]] == White {
+				b.addBlackPawnCapMove(sq, sq-11, b.Pieces[sq-11], list)
+			}
+
+			if b.EnPas != NoSq {
+				if sq-9 == b.EnPas {
+					b.addEnPassantMove(MOVE(sq, sq-9, Empty, Empty, MFlagEP), list)
+				}
+				if sq-11 == b.EnPas {
+					b.addEnPassantMove(MOVE(sq, sq-11, Empty, Empty, MFlagEP), list)
+				}
+			}
+		}
+	}
+
+	// Loop for Slider Pieces
+	pceIndex := LoopSlideIndex[side]
+	pce := LoopSlidePc[pceIndex]
+	for pce != 0 {
+		pce = LoopSlidePc[pceIndex]
+		for pceNum := 0; pceNum < b.PceNum[pce]; pceNum++ {
+			sq := b.PceList[pce][pceNum]
+			for index := 0; index < NumDir[pce]; index++ {
+				dir := PceDir[pce][index]
+				t_sq := dir + sq
+
+				for !isSqOffboard(t_sq) {
+
+					if b.Pieces[t_sq] != Empty {
+						if PieceCol[b.Pieces[t_sq]] == side^1 {
+							b.addCaptureMove(MOVE(sq, t_sq, b.Pieces[t_sq], Empty, 0), list)
+						}
+						break
+					}
+					t_sq += dir
+				}
+			}
+		}
+		pce = LoopSlidePc[pceIndex]
+		pceIndex++
+	}
+
+	// Loop for Non Slider Pieces
+	pceIndex = LoopNonSlideIndex[side]
+	pce = LoopNonSlidePc[pceIndex]
+	for pce != 0 {
+		pce = LoopNonSlidePc[pceIndex]
+		for pceNum := 0; pceNum < b.PceNum[pce]; pceNum++ {
+			sq := b.PceList[pce][pceNum]
+			for index := 0; index < NumDir[pce]; index++ {
+				dir := PceDir[pce][index]
+				t_sq := dir + sq
+
+				if isSqOffboard(t_sq) {
+					continue
+				}
+				if b.Pieces[t_sq] != Empty {
+					if PieceCol[b.Pieces[t_sq]] == side^1 {
+						b.addCaptureMove(MOVE(sq, t_sq, b.Pieces[t_sq], Empty, 0), list)
+					}
+					continue
+				}
 
 			}
 		}
